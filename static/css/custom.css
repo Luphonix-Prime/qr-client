@@ -1,0 +1,392 @@
+/* Custom CSS for QR Code Compliance System */
+
+/* Main layout adjustments */
+.main-content {
+    margin-top: 76px; /* Adjust for fixed navbar */
+    min-height: calc(100vh - 76px);
+}
+
+/* Card enhancements */
+.card {
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Navigation enhancements */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.nav-link {
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    color: var(--bs-primary) !important;
+}
+
+/* Button enhancements */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Table enhancements */
+.table tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Form enhancements */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Badge enhancements */
+.badge {
+    font-weight: 500;
+}
+
+/* Alert enhancements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+/* Modal enhancements */
+.modal-content {
+    border: none;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(var(--bs-border-color-rgb), 0.2);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(var(--bs-border-color-rgb), 0.2);
+}
+
+/* Progress bar enhancements */
+.progress {
+    height: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.progress-bar {
+    border-radius: 0.5rem;
+}
+
+/* Loading states */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+    z-index: 1000;
+}
+
+/* QR Code specific styles */
+.qr-code-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border: 2px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+}
+
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.qr-item {
+    text-align: center;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.qr-item:hover {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Print specific styles */
+.print-preview {
+    background: white;
+    color: black;
+    border: 1px solid #ddd;
+    min-height: 400px;
+    transform-origin: top left;
+    transition: transform 0.3s ease;
+}
+
+.print-queue-item {
+    border-left: 4px solid var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* Device configuration styles */
+.device-status-online {
+    color: var(--bs-success);
+}
+
+.device-status-offline {
+    color: var(--bs-danger);
+}
+
+.device-card {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.device-card.online {
+    border-left-color: var(--bs-success);
+}
+
+.device-card.offline {
+    border-left-color: var(--bs-danger);
+}
+
+/* Mapping styles */
+.mapping-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+.level-box {
+    border: 2px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    background: rgba(var(--bs-body-bg-rgb), 0.5);
+    min-width: 180px;
+    transition: all 0.2s ease-in-out;
+}
+
+.level-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.level-1 { border-color: var(--bs-primary); }
+.level-2 { border-color: var(--bs-success); }
+.level-3 { border-color: var(--bs-warning); }
+.level-4 { border-color: var(--bs-danger); }
+
+.mapping-arrow {
+    color: var(--bs-secondary);
+    font-size: 1.5rem;
+}
+
+.mapping-item {
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.mapping-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    border-color: var(--bs-primary) !important;
+}
+
+/* Report styles */
+.report-category-card {
+    height: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.report-category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+.report-status-pending {
+    background-color: rgba(var(--bs-warning-rgb), 0.1);
+}
+
+.report-status-completed {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+}
+
+.report-status-failed {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+/* Guidelines styles */
+.setup-step,
+.operation-step,
+.maintenance-schedule,
+.safety-section {
+    margin-bottom: 1.5rem;
+}
+
+.setup-step h6,
+.operation-step h6 {
+    border-bottom: 2px solid var(--bs-primary);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.maintenance-schedule .list-group-item {
+    border: none;
+    background: transparent;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.contact-item {
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: rgba(var(--bs-body-bg-rgb), 0.5);
+}
+
+/* Utility classes */
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.border-start-primary {
+    border-left: 4px solid var(--bs-primary) !important;
+}
+
+.border-start-success {
+    border-left: 4px solid var(--bs-success) !important;
+}
+
+.border-start-warning {
+    border-left: 4px solid var(--bs-warning) !important;
+}
+
+.border-start-danger {
+    border-left: 4px solid var(--bs-danger) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        margin-top: 60px;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .qr-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .mapping-diagram {
+        padding: 1rem;
+    }
+    
+    .level-box {
+        min-width: 140px;
+        padding: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .main-content {
+        margin-top: 0;
+    }
+    
+    .navbar,
+    .btn,
+    .btn-group,
+    .dropdown,
+    .modal {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .page-break {
+        page-break-after: always;
+    }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-body-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-primary);
+}

@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% block title %}Device Configuration - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-network-wired me-2 text-primary"></i>Device Configuration
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPrinterModal">
+                        <i class="fas fa-plus me-2"></i>Add Printer
+                    </button>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addScannerModal">
+                        <i class="fas fa-plus me-2"></i>Add Scanner
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Status Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-print fa-2x text-primary mb-2"></i>
+                    <h4 class="text-primary">{{ printers|length }}</h4>
+                    <p class="text-muted mb-0">Total Printers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h4 class="text-success">{{ printers|selectattr('is_active')|list|length }}</h4>
+                    <p class="text-muted mb-0">Active Printers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-barcode fa-2x text-info mb-2"></i>
+                    <h4 class="text-info">{{ scanners|length }}</h4>
+                    <p class="text-muted mb-0">Total Scanners</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-wifi fa-2x text-warning mb-2"></i>
+                    <h4 class="text-warning">{{ scanners|selectattr('is_active')|list|length }}</h4>
+                    <p class="text-muted mb-0">Active Scanners</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Tabs -->
+    <ul class="nav nav-tabs mb-4" id="deviceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="printers-tab" data-bs-toggle="tab" data-bs-target="#printers" type="button" role="tab">
+                <i class="fas fa-print me-2"></i>Printers
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="scanners-tab" data-bs-toggle="tab" data-bs-target="#scanners" type="button" role="tab">
+                <i class="fas fa-barcode me-2"></i>Scanners
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="network-tab" data-bs-toggle="tab" data-bs-target="#network" type="button" role="tab">
+                <i class="fas fa-network-wired me-2"></i>Network Tools
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="deviceTabContent">
+        <!-- Printers Tab -->
+        <div class="tab-pane fade show active" id="printers" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-print me-2"></i>Printer Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if printers %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>IP Address</th>
+                                    <th>Type</th>
+                                    <th>Paper Size</th>
+                                    <th>Status</th>
+                                    <th>Last Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for printer in printers %}
+                                <tr id="printer-{{ printer.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-print me-2 text-primary"></i>
+                                            <div>
+                                                <strong>{{ printer.name }}</strong>
+                                                {% if printer.is_default %}
+                                                <span class="badge bg-primary ms-2">Default</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code>{{ printer.ip_address }}:{{ printer.port }}</code>
+                                    </td>
+                                    <td>{{ printer.printer_type or '-' }}</td>
+                                    <td>{{ printer.paper_size or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if printer.is_active else 'danger' }}">
+                                            {{ 'Online' if printer.is_active else 'Offline' }}
+                                        </span>
+                                        <button class="btn btn-sm btn-outline-primary ms-2 test-printer-btn"
+                                                onclick="testPrinter('{{ printer.id }}')"
+                                                title="Test printer connection"
+                                                data-printer-id="{{ printer.id }}">
+                                            <i class="fas fa-play"></i>
+                                            <span>Test</span>
+                                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        {% if printer.last_used %}
+                                        {{ printer.last_used.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                        <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+<button class="btn btn-outline-primary" 
+        onclick="editPrinter('{{ printer.id }}')"
+        title="Edit printer settings"
+        data-printer-id="{{ printer.id }}">
+    <i class="fas fa-edit"></i>
+    <span class="visually-hidden">Edit printer</span>
+</button>
+
+<button class="btn btn-outline-success"
+        onclick="setPrinterDefault('{{ printer.id }}')"
+        title="Set as default printer"
+        data-printer-id="{{ printer.id }}"
+        {{ 'disabled' if printer.is_default else '' }}>
+    <i class="fas fa-star"></i>
+    <span class="visually-hidden">Set as default printer</span>
+</button>
+
+<button class="btn btn-outline-danger"
+        onclick="deletePrinter('{{ printer.id }}')"
+        title="Delete printer"
+        data-printer-id="{{ printer.id }}"
+        data-bs-toggle="modal" 
+        data-bs-target="#confirmDeleteModal">
+    <i class="fas fa-trash"></i>
+    <span class="visually-hidden">Delete printer</span>
+</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-print fa-3x mb-3"></i>
+                        <h5>No printers configured</h5>
+                        <p>Add your first printer to start printing QR codes</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPrinterModal">
+                            <i class="fas fa-plus me-2"></i>Add Printer
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanners Tab -->
+        <div class="tab-pane fade" id="scanners" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-barcode me-2"></i>Scanner Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if scanners %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>IP Address</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Last Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scanner in scanners %}
+                                <tr id="scanner-{{ scanner.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-barcode me-2 text-info"></i>
+                                            <strong>{{ scanner.name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code>{{ scanner.ip_address }}:{{ scanner.port }}</code>
+                                    </td>
+                                    <td>{{ scanner.scanner_type or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if scanner.is_active else 'danger' }}">
+                                            {{ 'Online' if scanner.is_active else 'Offline' }}
+                                        </span>
+                                        <button class="btn btn-sm btn-outline-info ms-2" onclick="testScanner('{{ printer.id }}')">
+                                            <i class="fas fa-play"></i> Test
+                                        </button>
+                                    </td>
+                                    <td>
+                                        {% if scanner.last_used %}
+                                        {{ scanner.last_used.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                        <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+<button class="btn btn-outline-primary" 
+        onclick="editScanner('{{ scanner.id }}')"
+        title="Edit scanner settings"
+        data-scanner-id="{{ scanner.id }}">
+    <i class="fas fa-edit"></i>
+    <span class="visually-hidden">Edit scanner</span>
+</button>
+
+<button class="btn btn-outline-danger"
+        onclick="deleteScanner('{{ scanner.id }}')"
+        title="Delete scanner"
+        data-scanner-id="{{ scanner.id }}"
+        data-bs-toggle="modal"
+        data-bs-target="#confirmDeleteModal">
+    <i class="fas fa-trash"></i>
+    <span class="visually-hidden">Delete scanner</span>
+</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-barcode fa-3x mb-3"></i>
+                        <h5>No scanners configured</h5>
+                        <p>Add scanners to enable QR code verification</p>
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addScannerModal">
+                            <i class="fas fa-plus me-2"></i>Add Scanner
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Tools Tab -->
+        <div class="tab-pane fade" id="network" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-search me-2"></i>Network Discovery
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Scan network for available printers and scanners</p>
+                            
+                            <div class="mb-3">
+                                <label for="networkRange" class="form-label">Network Range</label>
+                                <input type="text" class="form-control" id="networkRange" value="192.168.1.1-254" placeholder="IP range to scan">
+                            </div>
+                            
+                            <button class="btn btn-info w-100" onclick="scanNetwork()">
+                                <i class="fas fa-search me-2"></i>Start Network Scan
+                            </button>
+                            
+                            <div id="scanResults" class="mt-3 d-none">
+                                <h6>Scan Results:</h6>
+                                <div id="scanResultsList" class="list-group">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tools me-2"></i>Connectivity Test
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Test connection to specific device</p>
+                            
+                            <div class="mb-3">
+                                <label for="testIp" class="form-label">IP Address</label>
+                                <input type="text" class="form-control" id="testIp" placeholder="192.168.1.100">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="testPort" class="form-label">Port</label>
+                                <input type="number" class="form-control" id="testPort" value="9100" placeholder="9100">
+                            </div>
+                            
+                            <button class="btn btn-warning w-100" onclick="testConnection()">
+                                <i class="fas fa-plug me-2"></i>Test Connection
+                            </button>
+                            
+                            <div id="testResults" class="mt-3">
+                                <!-- Test results will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Network Status -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Network Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-wifi fa-2x text-success mb-2"></i>
+                                <h6>Network Status</h6>
+                                <span class="badge bg-success">Connected</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-server fa-2x text-info mb-2"></i>
+                                <h6>Server Status</h6>
+                                <span class="badge bg-info">Running</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-database fa-2x text-primary mb-2"></i>
+                                <h6>Database Status</h6>
+                                <span class="badge bg-primary">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Printer Modal -->
+<div class="modal fade" id="addPrinterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Add New Printer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addPrinterForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="printerName" class="form-label">Printer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="printerName" name="name" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="printerIp" class="form-label">IP Address <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="printerIp" name="ip_address" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="printerPort" class="form-label">Port</label>
+                            <input type="number" class="form-control" id="printerPort" name="port" value="9100">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="printerType" class="form-label">Printer Type</label>
+                            <select class="form-select" id="printerType" name="printer_type">
+                                <option value="">Select type...</option>
+                                <option value="Thermal">Thermal</option>
+                                <option value="Inkjet">Inkjet</option>
+                                <option value="Laser">Laser</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="paperSize" class="form-label">Paper Size</label>
+                            <select class="form-select" id="paperSize" name="paper_size">
+                                <option value="">Select size...</option>
+                                <option value="A4">A4</option>
+                                <option value="Letter">Letter</option>
+                                <option value="Label">Label</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="printerDpi" class="form-label">DPI</label>
+                        <select class="form-select" id="printerDpi" name="dpi">
+                            <option value="203">203 DPI</option>
+                            <option value="300">300 DPI</option>
+                            <option value="600">600 DPI</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isDefault" name="is_default">
+                        <label class="form-check-label" for="isDefault">
+                            Set as default printer
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Add Printer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Scanner Modal -->
+<div class="modal fade" id="addScannerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Add New Scanner
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addScannerForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="scannerName" class="form-label">Scanner Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="scannerName" name="name" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="scannerIp" class="form-label">IP Address <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="scannerIp" name="ip_address" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="scannerPort" class="form-label">Port</label>
+                            <input type="number" class="form-control" id="scannerPort" name="port" value="8080">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="scannerType" class="form-label">Scanner Type</label>
+                        <select class="form-select" id="scannerType" name="scanner_type">
+                            <option value="">Select type...</option>
+                            <option value="Handheld">Handheld</option>
+                            <option value="Fixed Mount">Fixed Mount</option>
+                            <option value="Mobile">Mobile</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save me-2"></i>Add Scanner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testPrinter(printerId) {
+    console.log('Testing printer:', printerId);
+    // Simulate printer test
+    alert('Printer test completed successfully!');
+}
+
+function editPrinter(printerId) {
+    console.log('Editing printer:', printerId);
+    // Implementation for editing printer
+}
+
+function setPrinterDefault(printerId) {
+    console.log('Setting default printer:', printerId);
+    // Implementation for setting default printer
+}
+
+function deletePrinter(printerId) {
+    if (confirm('Are you sure you want to delete this printer?')) {
+        console.log('Deleting printer:', printerId);
+        document.getElementById(`printer-${printerId}`).remove();
+    }
+}
+
+function testScanner(scannerId) {
+    console.log('Testing scanner:', scannerId);
+    // Simulate scanner test
+    alert('Scanner test completed successfully!');
+}
+
+function editScanner(scannerId) {
+    console.log('Editing scanner:', scannerId);
+    // Implementation for editing scanner
+}
+
+function deleteScanner(scannerId) {
+    if (confirm('Are you sure you want to delete this scanner?')) {
+        console.log('Deleting scanner:', scannerId);
+        document.getElementById(`scanner-${scannerId}`).remove();
+    }
+}
+
+function scanNetwork() {
+    const networkRange = document.getElementById('networkRange').value;
+    const resultsDiv = document.getElementById('scanResults');
+    const resultsList = document.getElementById('scanResultsList');
+    
+    resultsDiv.classList.remove('d-none');
+    resultsList.innerHTML = '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Scanning network...</div>';
+    
+    // Simulate network scan
+    setTimeout(() => {
+        resultsList.innerHTML = `
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>192.168.1.100</strong><br>
+                    <small class="text-muted">Thermal Printer</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="addFoundDevice('192.168.1.100', 'printer')">Add</button>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>192.168.1.105</strong><br>
+                    <small class="text-muted">QR Scanner</small>
+                </div>
+                <button class="btn btn-sm btn-outline-info" onclick="addFoundDevice('192.168.1.105', 'scanner')">Add</button>
+            </div>
+        `;
+    }, 2000);
+}
+
+function testConnection() {
+    const ip = document.getElementById('testIp').value;
+    const port = document.getElementById('testPort').value;
+    const resultsDiv = document.getElementById('testResults');
+    
+    if (!ip) {
+        alert('Please enter an IP address');
+        return;
+    }
+    
+    resultsDiv.innerHTML = '<div class="text-center p-2"><i class="fas fa-spinner fa-spin"></i> Testing connection...</div>';
+    
+    // Simulate connection test
+    setTimeout(() => {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Connection to ${ip}:${port} successful!
+            </div>
+        `;
+    }, 1500);
+}
+
+function addFoundDevice(ip, type) {
+    if (type === 'printer') {
+        document.getElementById('printerIp').value = ip;
+        $('#addPrinterModal').modal('show');
+    } else {
+        document.getElementById('scannerIp').value = ip;
+        $('#addScannerModal').modal('show');
+    }
+}
+
+// Form submissions
+document.getElementById('addPrinterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('Adding printer...');
+    $('#addPrinterModal').modal('hide');
+    alert('Printer added successfully!');
+    this.reset();
+});
+
+document.getElementById('addScannerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('Adding scanner...');
+    $('#addScannerModal').modal('hide');
+    alert('Scanner added successfully!');
+    this.reset();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}QR Generation - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-qrcode me-2 text-primary"></i>QR Code Generation
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="exportBatches()">
+                        <i class="fas fa-download me-2"></i>Export Batches
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- QR Generation Form -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Generate New Batch
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('generate_qr_batch') }}" method="POST" id="qrGenerationForm">
+                        <div class="mb-3">
+                            <label for="product_id" class="form-label">Product <span class="text-danger">*</span></label>
+                            <select class="form-select" id="product_id" name="product_id" required onchange="updateProductInfo()">
+                                <option value="">Select Product</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" data-batch-size="{{ product.batch_size }}" data-sku="{{ product.sku }}">
+                                    {{ product.sku }} - {{ product.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="batch_code" class="form-label">Batch Code <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="batch_code" name="batch_code" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="generateBatchCode()">
+                                    <i class="fas fa-magic"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Unique identifier for this batch</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="10000" required>
+                            <div class="form-text">Number of QR codes to generate (max 10,000)</div>
+                        </div>
+                        
+                        <!-- Product Info Display -->
+                        <div id="productInfo" class="alert alert-info d-none">
+                            <h6><i class="fas fa-info-circle me-2"></i>Product Information</h6>
+                            <div id="productDetails"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100" id="generateBtn">
+                            <i class="fas fa-qrcode me-2"></i>Generate QR Codes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch List -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-layer-group me-2"></i>Recent Batches
+                        <span class="badge bg-primary ms-2">{{ batches|length }} batches</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if batches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Batch Code</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for batch in batches %}
+                                <tr id="batch-{{ batch.id }}">
+                                    <td>
+                                        <code class="text-primary">{{ batch.batch_code }}</code>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ batch.product.sku }}</strong>
+                                            <br><small class="text-muted">{{ batch.product.name[:30] }}{% if batch.product.name|length > 30 %}...{% endif %}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ batch.quantity }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if batch.status == 'Generated' else 'warning' if batch.status == 'Pending' else 'primary' }}">
+                                            {{ batch.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ batch.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary" onclick="viewBatch({{ batch.id }})" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if batch.status == 'Generated' %}
+                                            <button class="btn btn-outline-success" onclick="printBatch({{ batch.id }})" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-outline-info" onclick="downloadBatch({{ batch.id }})" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-layer-group fa-3x mb-3"></i>
+                        <h5>No batches generated yet</h5>
+                        <p>Create your first QR code batch using the form on the left.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Details Modal -->
+<div class="modal fade" id="batchDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-layer-group me-2"></i>Batch Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="batchDetailsContent">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Preview Modal -->
+<div class="modal fade" id="qrPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>QR Code Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrPreviewContent">
+                    <!-- QR code preview will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printQR()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/qr_operations.js') }}"></script>
+<script>
+function updateProductInfo() {
+    const select = document.getElementById('product_id');
+    const selectedOption = select.options[select.selectedIndex];
+    const productInfo = document.getElementById('productInfo');
+    const productDetails = document.getElementById('productDetails');
+    const quantityInput = document.getElementById('quantity');
+    
+    if (selectedOption.value) {
+        const batchSize = selectedOption.getAttribute('data-batch-size');
+        const sku = selectedOption.getAttribute('data-sku');
+        
+        productDetails.innerHTML = `
+            <strong>SKU:</strong> ${sku}<br>
+            <strong>Default Batch Size:</strong> ${batchSize} units
+        `;
+        
+        quantityInput.value = batchSize;
+        productInfo.classList.remove('d-none');
+    } else {
+        productInfo.classList.add('d-none');
+        quantityInput.value = '';
+    }
+}
+
+function generateBatchCode() {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const timeStr = now.toTimeString().slice(0, 5).replace(':', '');
+    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+    
+    document.getElementById('batch_code').value = `BATCH_${dateStr}_${timeStr}_${randomStr}`;
+}
+
+function viewBatch(batchId) {
+    // Load batch details via AJAX
+    fetch(`/api/qr-batch/${batchId}/status`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('batchDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Batch Information</h6>
+                        <table class="table table-borderless">
+                            <tr><td><strong>Status:</strong></td><td><span class="badge bg-${data.status === 'Generated' ? 'success' : 'warning'}">${data.status}</span></td></tr>
+                            <tr><td><strong>Quantity:</strong></td><td>${data.quantity}</td></tr>
+                            <tr><td><strong>Generated:</strong></td><td>${data.generated_count}</td></tr>
+                            <tr><td><strong>Created:</strong></td><td>${new Date(data.created_at).toLocaleString()}</td></tr>
+                            ${data.generated_at ? `<tr><td><strong>Generated At:</strong></td><td>${new Date(data.generated_at).toLocaleString()}</td></tr>` : ''}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Progress</h6>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: ${(data.generated_count / data.quantity) * 100}%" aria-valuenow="${data.generated_count}" aria-valuemin="0" aria-valuemax="${data.quantity}">
+                                ${Math.round((data.generated_count / data.quantity) * 100)}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#batchDetailsModal').modal('show');
+        })
+        .catch(error => {
+            console.error('Error loading batch details:', error);
+            alert('Error loading batch details');
+        });
+}
+
+function printBatch(batchId) {
+    window.location.href = `/printing?batch_id=${batchId}`;
+}
+
+function downloadBatch(batchId) {
+    // Implement batch download functionality
+    console.log('Download batch:', batchId);
+}
+
+function exportBatches() {
+    window.location.href = '/api/export-csv/batches';
+}
+
+// Form validation and submission
+document.getElementById('qrGenerationForm').addEventListener('submit', function(e) {
+    const productId = document.getElementById('product_id').value;
+    const batchCode = document.getElementById('batch_code').value.trim();
+    const quantity = document.getElementById('quantity').value;
+    
+    if (!productId || !batchCode || !quantity) {
+        e.preventDefault();
+        alert('Please fill in all required fields!');
+        return false;
+    }
+    
+    if (quantity < 1 || quantity > 10000) {
+        e.preventDefault();
+        alert('Quantity must be between 1 and 10,000!');
+        return false;
+    }
+    
+    // Show loading state
+    const btn = document.getElementById('generateBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    btn.disabled = true;
+});
+
+// Auto-generate batch code on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if batch_code is empty and generate one
+    if (!document.getElementById('batch_code').value) {
+        generateBatchCode();
+    }
+    
+    // Pre-select product if coming from product page
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product_id');
+    if (productId) {
+        document.getElementById('product_id').value = productId;
+        updateProductInfo();
+    }
+});
+</script>
+{% endblock %}

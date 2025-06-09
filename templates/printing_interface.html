@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}Printing Interface - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-print me-2 text-primary"></i>Printing Interface
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="refreshPrinters()">
+                        <i class="fas fa-sync me-2"></i>Refresh Printers
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Printer Selection -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-print me-2"></i>Printer Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="printer_select" class="form-label">Select Printer <span class="text-danger">*</span></label>
+                        <select class="form-select" id="printer_select" onchange="updatePrinterInfo()">
+                            <option value="">Choose a printer...</option>
+                            {% for printer in printers %}
+                            <option value="{{ printer.id }}" 
+                                    data-ip="{{ printer.ip_address }}" 
+                                    data-type="{{ printer.printer_type }}"
+                                    data-paper="{{ printer.paper_size }}"
+                                    data-dpi="{{ printer.dpi }}">
+                                {{ printer.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="printerInfo" class="alert alert-info d-none">
+                        <h6><i class="fas fa-info-circle me-2"></i>Printer Details</h6>
+                        <div id="printerDetails"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Print Settings</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="copies" class="form-label small">Copies</label>
+                                <input type="number" class="form-control form-control-sm" id="copies" value="1" min="1" max="10">
+                            </div>
+                            <div class="col-6">
+                                <label for="quality" class="form-label small">Quality</label>
+                                <select class="form-select form-select-sm" id="quality">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="printPreview" checked>
+                        <label class="form-check-label" for="printPreview">
+                            Show print preview
+                        </label>
+                    </div>
+
+                    <button class="btn btn-success w-100" id="startPrintBtn" onclick="startPrintJob()" disabled>
+                        <i class="fas fa-play me-2"></i>Start Print Job
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Selection -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-layer-group me-2"></i>Batch Selection
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="batch_select" class="form-label">Select Batch <span class="text-danger">*</span></label>
+                        <select class="form-select" id="batch_select" onchange="updateBatchInfo()">
+                            <option value="">Choose a batch...</option>
+                            {% for batch in batches %}
+                            <option value="{{ batch.id }}" 
+                                    data-quantity="{{ batch.quantity }}"
+                                    data-product="{{ batch.product.name }}"
+                                    data-sku="{{ batch.product.sku }}">
+                                {{ batch.batch_code }} ({{ batch.quantity }} codes)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="batchInfo" class="alert alert-success d-none">
+                        <h6><i class="fas fa-info-circle me-2"></i>Batch Details</h6>
+                        <div id="batchDetails"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="print_range" class="form-label">Print Range</label>
+                        <select class="form-select" id="print_range" onchange="toggleCustomRange()">
+                            <option value="all">Print All QR Codes</option>
+                            <option value="range">Custom Range</option>
+                        </select>
+                    </div>
+
+                    <div id="customRangeInputs" class="d-none">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="start_index" class="form-label small">From</label>
+                                <input type="number" class="form-control form-control-sm" id="start_index" min="1">
+                            </div>
+                            <div class="col-6">
+                                <label for="end_index" class="form-label small">To</label>
+                                <input type="number" class="form-control form-control-sm" id="end_index" min="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Queue -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Print Queue
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="printQueue">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p class="small">No print jobs in queue</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Preview and Controls -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-eye me-2"></i>Print Preview
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="zoomOut()">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="zoomReset()">
+                                <span id="zoomLevel">100%</span>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="zoomIn()">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="printPreviewArea" class="text-center">
+                        <div class="text-muted py-5">
+                            <i class="fas fa-file-image fa-3x mb-3"></i>
+                            <h5>Select a batch and printer to see preview</h5>
+                            <p>Preview will show the layout of QR codes as they will be printed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Status -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Print Status & History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-success mb-1">0</div>
+                                <div class="small text-muted">Jobs Completed</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-warning mb-1">0</div>
+                                <div class="small text-muted">Jobs Pending</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-danger mb-1">0</div>
+                                <div class="small text-muted">Jobs Failed</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-info mb-1">0</div>
+                                <div class="small text-muted">Total Printed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Job ID</th>
+                                    <th>Batch</th>
+                                    <th>Printer</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Started</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="printHistoryTable">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        No print jobs found
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Job Modal -->
+<div class="modal fade" id="printJobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-print me-2"></i>Print Job Progress
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="printJobProgress">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Printing...</span>
+                        </div>
+                        <h6>Preparing print job...</h6>
+                        <div class="progress mt-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" id="progressBar"></div>
+                        </div>
+                        <div id="progressText" class="small text-muted mt-2">Initializing...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="cancelPrintJob()">
+                    <i class="fas fa-stop me-2"></i>Cancel Job
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/printing.js') }}"></script>
+<script>
+let selectedPrinter = null;
+let selectedBatch = null;
+let currentZoom = 100;
+
+function updatePrinterInfo() {
+    const select = document.getElementById('printer_select');
+    const selectedOption = select.options[select.selectedIndex];
+    const printerInfo = document.getElementById('printerInfo');
+    const printerDetails = document.getElementById('printerDetails');
+    const startBtn = document.getElementById('startPrintBtn');
+    
+    if (selectedOption.value) {
+        selectedPrinter = {
+            id: selectedOption.value,
+            name: selectedOption.text,
+            ip: selectedOption.getAttribute('data-ip'),
+            type: selectedOption.getAttribute('data-type'),
+            paper: selectedOption.getAttribute('data-paper'),
+            dpi: selectedOption.getAttribute('data-dpi')
+        };
+        
+        printerDetails.innerHTML = `
+            <strong>IP Address:</strong> ${selectedPrinter.ip}<br>
+            <strong>Type:</strong> ${selectedPrinter.type}<br>
+            <strong>Paper Size:</strong> ${selectedPrinter.paper}<br>
+            <strong>DPI:</strong> ${selectedPrinter.dpi}
+        `;
+        
+        printerInfo.classList.remove('d-none');
+        checkPrintReadiness();
+    } else {
+        selectedPrinter = null;
+        printerInfo.classList.add('d-none');
+        startBtn.disabled = true;
+    }
+}
+
+function updateBatchInfo() {
+    const select = document.getElementById('batch_select');
+    const selectedOption = select.options[select.selectedIndex];
+    const batchInfo = document.getElementById('batchInfo');
+    const batchDetails = document.getElementById('batchDetails');
+    
+    if (selectedOption.value) {
+        selectedBatch = {
+            id: selectedOption.value,
+            code: selectedOption.text.split(' ')[0],
+            quantity: selectedOption.getAttribute('data-quantity'),
+            product: selectedOption.getAttribute('data-product'),
+            sku: selectedOption.getAttribute('data-sku')
+        };
+        
+        batchDetails.innerHTML = `
+            <strong>Product:</strong> ${selectedBatch.sku}<br>
+            <strong>Name:</strong> ${selectedBatch.product}<br>
+            <strong>QR Codes:</strong> ${selectedBatch.quantity}
+        `;
+        
+        // Update range inputs
+        document.getElementById('end_index').value = selectedBatch.quantity;
+        document.getElementById('start_index').value = 1;
+        
+        batchInfo.classList.remove('d-none');
+        checkPrintReadiness();
+        updatePreview();
+    } else {
+        selectedBatch = null;
+        batchInfo.classList.add('d-none');
+        document.getElementById('startPrintBtn').disabled = true;
+    }
+}
+
+function checkPrintReadiness() {
+    const startBtn = document.getElementById('startPrintBtn');
+    startBtn.disabled = !(selectedPrinter && selectedBatch);
+}
+
+function toggleCustomRange() {
+    const rangeSelect = document.getElementById('print_range');
+    const customInputs = document.getElementById('customRangeInputs');
+    
+    if (rangeSelect.value === 'range') {
+        customInputs.classList.remove('d-none');
+    } else {
+        customInputs.classList.add('d-none');
+    }
+}
+
+function updatePreview() {
+    if (!selectedBatch) return;
+    
+    const previewArea = document.getElementById('printPreviewArea');
+    previewArea.innerHTML = `
+        <div class="border rounded p-3" style="background: white; color: black;">
+            <h6 class="text-center mb-3">Print Preview - ${selectedBatch.code}</h6>
+            <div class="row">
+                <div class="col-4 text-center border-end">
+                    <div class="p-2">
+                        <div class="border" style="width: 80px; height: 80px; margin: 0 auto; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-qrcode fa-2x"></i>
+                        </div>
+                        <small class="d-block mt-1">${selectedBatch.sku}-001</small>
+                    </div>
+                </div>
+                <div class="col-4 text-center border-end">
+                    <div class="p-2">
+                        <div class="border" style="width: 80px; height: 80px; margin: 0 auto; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-qrcode fa-2x"></i>
+                        </div>
+                        <small class="d-block mt-1">${selectedBatch.sku}-002</small>
+                    </div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="p-2">
+                        <div class="border" style="width: 80px; height: 80px; margin: 0 auto; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-qrcode fa-2x"></i>
+                        </div>
+                        <small class="d-block mt-1">${selectedBatch.sku}-003</small>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <small class="text-muted">... and ${selectedBatch.quantity - 3} more QR codes</small>
+            </div>
+        </div>
+    `;
+}
+
+function startPrintJob() {
+    if (!selectedPrinter || !selectedBatch) {
+        alert('Please select both a printer and batch');
+        return;
+    }
+    
+    const printRange = document.getElementById('print_range').value;
+    let quantity = selectedBatch.quantity;
+    
+    if (printRange === 'range') {
+        const start = parseInt(document.getElementById('start_index').value);
+        const end = parseInt(document.getElementById('end_index').value);
+        
+        if (start > end || start < 1 || end > selectedBatch.quantity) {
+            alert('Invalid print range');
+            return;
+        }
+        
+        quantity = end - start + 1;
+    }
+    
+    // Show progress modal
+    $('#printJobModal').modal('show');
+    
+    // Simulate print job
+    simulatePrintJob(quantity);
+}
+
+function simulatePrintJob(quantity) {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Printing ${Math.floor((progress / 100) * quantity)} of ${quantity} QR codes...`;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            progressText.textContent = 'Print job completed successfully!';
+            
+            setTimeout(() => {
+                $('#printJobModal').modal('hide');
+                addToQueue('Completed');
+            }, 2000);
+        }
+    }, 500);
+}
+
+function addToQueue(status) {
+    const queue = document.getElementById('printQueue');
+    const jobId = 'PRINT_' + Date.now();
+    
+    queue.innerHTML = `
+        <div class="card mb-2">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${jobId}</strong><br>
+                        <small class="text-muted">${selectedBatch.code}</small>
+                    </div>
+                    <span class="badge bg-${status === 'Completed' ? 'success' : 'warning'}">${status}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function refreshPrinters() {
+    // Simulate printer refresh
+    console.log('Refreshing printers...');
+}
+
+function zoomIn() {
+    currentZoom = Math.min(currentZoom + 25, 200);
+    updateZoom();
+}
+
+function zoomOut() {
+    currentZoom = Math.max(currentZoom - 25, 50);
+    updateZoom();
+}
+
+function zoomReset() {
+    currentZoom = 100;
+    updateZoom();
+}
+
+function updateZoom() {
+    document.getElementById('zoomLevel').textContent = currentZoom + '%';
+    const previewArea = document.getElementById('printPreviewArea');
+    previewArea.style.transform = `scale(${currentZoom / 100})`;
+}
+
+function cancelPrintJob() {
+    $('#printJobModal').modal('hide');
+}
+
+// Check URL parameters for batch selection
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const batchId = urlParams.get('batch_id');
+    if (batchId) {
+        document.getElementById('batch_select').value = batchId;
+        updateBatchInfo();
+    }
+});
+</script>
+{% endblock %}

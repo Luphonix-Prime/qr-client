@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+
+{% block title %}Rewinding Machine Guidelines - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>Rewinding Machine Guidelines
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="printGuidelines()">
+                        <i class="fas fa-print me-2"></i>Print Guidelines
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="exportGuidelines()">
+                        <i class="fas fa-download me-2"></i>Export PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" id="guidelinesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="setup-tab" data-bs-toggle="tab" data-bs-target="#setup" type="button" role="tab">
+                <i class="fas fa-cog me-2"></i>Machine Setup
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="operation-tab" data-bs-toggle="tab" data-bs-target="#operation" type="button" role="tab">
+                <i class="fas fa-play-circle me-2"></i>Operation Procedures
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">
+                <i class="fas fa-tools me-2"></i>Maintenance
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="troubleshooting-tab" data-bs-toggle="tab" data-bs-target="#troubleshooting" type="button" role="tab">
+                <i class="fas fa-exclamation-triangle me-2"></i>Troubleshooting
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="safety-tab" data-bs-toggle="tab" data-bs-target="#safety" type="button" role="tab">
+                <i class="fas fa-shield-alt me-2"></i>Safety Guidelines
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="guidelinesTabContent">
+        <!-- Machine Setup -->
+        <div class="tab-pane fade show active" id="setup" role="tabpanel">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cog me-2"></i>Initial Machine Setup
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="setup-step mb-4">
+                                <h6 class="text-primary">
+                                    <span class="badge bg-primary me-2">1</span>Pre-Installation Inspection
+                                </h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="fas fa-check text-success me-2"></i>Verify power requirements (220V, 15A)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Check floor space requirements (2m x 1.5m minimum)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Ensure proper ventilation clearance (30cm on all sides)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Verify compressed air availability (6-8 bar)</li>
+                                </ul>
+                            </div>
+
+                            <div class="setup-step mb-4">
+                                <h6 class="text-primary">
+                                    <span class="badge bg-primary me-2">2</span>Mechanical Installation
+                                </h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="fas fa-check text-success me-2"></i>Level the machine using adjustable feet</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Install roll guides and tension adjusters</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Mount the rewind core holder assembly</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Configure label edge sensors</li>
+                                </ul>
+                            </div>
+
+                            <div class="setup-step mb-4">
+                                <h6 class="text-primary">
+                                    <span class="badge bg-primary me-2">3</span>Electrical Connections
+                                </h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="fas fa-check text-success me-2"></i>Connect main power supply</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Wire control panel and display unit</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Install emergency stop circuits</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Test all safety interlocks</li>
+                                </ul>
+                            </div>
+
+                            <div class="setup-step mb-4">
+                                <h6 class="text-primary">
+                                    <span class="badge bg-primary me-2">4</span>Software Configuration
+                                </h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="fas fa-check text-success me-2"></i>Load machine operating system</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Configure network settings for QR integration</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Set up label format parameters</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Calibrate sensors and positioning</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Setup Tips
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <strong>Important:</strong> Always ensure proper grounding before connecting electrical components.
+                            </div>
+                            <div class="alert alert-warning">
+                                <strong>Note:</strong> Machine calibration must be performed by certified technicians only.
+                            </div>
+                            <div class="alert alert-success">
+                                <strong>Tip:</strong> Document all settings during initial setup for future reference.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-tools me-2"></i>Required Tools
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-wrench text-primary me-2"></i>Metric wrench set</li>
+                                <li><i class="fas fa-screwdriver text-primary me-2"></i>Phillips/flathead screwdrivers</li>
+                                <li><i class="fas fa-ruler text-primary me-2"></i>Digital level meter</li>
+                                <li><i class="fas fa-bolt text-primary me-2"></i>Electrical multimeter</li>
+                                <li><i class="fas fa-laptop text-primary me-2"></i>Configuration laptop</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operation Procedures -->
+        <div class="tab-pane fade" id="operation" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-play-circle me-2"></i>Standard Operating Procedure
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="operation-step mb-3">
+                                <h6 class="text-success">
+                                    <span class="badge bg-success me-2">1</span>Pre-Operation Checks
+                                </h6>
+                                <ul class="small">
+                                    <li>Verify material roll is properly loaded</li>
+                                    <li>Check tension settings match material specifications</li>
+                                    <li>Ensure rewind core is correctly positioned</li>
+                                    <li>Test emergency stop functionality</li>
+                                </ul>
+                            </div>
+
+                            <div class="operation-step mb-3">
+                                <h6 class="text-success">
+                                    <span class="badge bg-success me-2">2</span>Material Loading
+                                </h6>
+                                <ul class="small">
+                                    <li>Thread material through guide rollers</li>
+                                    <li>Attach leading edge to rewind core</li>
+                                    <li>Set appropriate rewind tension</li>
+                                    <li>Verify material alignment with sensors</li>
+                                </ul>
+                            </div>
+
+                            <div class="operation-step mb-3">
+                                <h6 class="text-success">
+                                    <span class="badge bg-success me-2">3</span>Operation Start
+                                </h6>
+                                <ul class="small">
+                                    <li>Select appropriate speed settings</li>
+                                    <li>Enable QR code reading mode</li>
+                                    <li>Start machine in slow mode initially</li>
+                                    <li>Monitor for proper material tracking</li>
+                                </ul>
+                            </div>
+
+                            <div class="operation-step mb-3">
+                                <h6 class="text-success">
+                                    <span class="badge bg-success me-2">4</span>Quality Monitoring
+                                </h6>
+                                <ul class="small">
+                                    <li>Check QR code read accuracy periodically</li>
+                                    <li>Monitor material edge quality</li>
+                                    <li>Verify rewind roll tightness</li>
+                                    <li>Document any quality issues</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cogs me-2"></i>Machine Parameters
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Range</th>
+                                        <th>Typical</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Speed</td>
+                                        <td>1-50 m/min</td>
+                                        <td>25 m/min</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tension</td>
+                                        <td>0.5-5.0 N</td>
+                                        <td>2.0 N</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Core Size</td>
+                                        <td>25-76 mm</td>
+                                        <td>38 mm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Material Width</td>
+                                        <td>10-200 mm</td>
+                                        <td>100 mm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="mt-3">
+                                <h6>Operating Modes</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 text-center">
+                                            <i class="fas fa-turtle text-info"></i>
+                                            <div class="small">Slow Mode</div>
+                                            <div class="small text-muted">1-10 m/min</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 text-center">
+                                            <i class="fas fa-rabbit text-success"></i>
+                                            <div class="small">Fast Mode</div>
+                                            <div class="small text-muted">20-50 m/min</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-stopwatch me-2"></i>Performance Metrics
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="h5 text-primary">99.8%</div>
+                                    <small>QR Read Rate</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="h5 text-success">85%</div>
+                                    <small>Efficiency</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="h5 text-info">0.02%</div>
+                                    <small>Waste Rate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="tab-pane fade" id="maintenance" role="tabpanel">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tools me-2"></i>Maintenance Schedule
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="maintenance-schedule">
+                                <h6 class="text-info">Daily Maintenance</h6>
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-broom text-primary me-2"></i>Clean material path and sensors</span>
+                                        <span class="badge bg-primary">5 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-eye text-primary me-2"></i>Visual inspection of moving parts</span>
+                                        <span class="badge bg-primary">3 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-chart-line text-primary me-2"></i>Check performance metrics</span>
+                                        <span class="badge bg-primary">2 min</span>
+                                    </li>
+                                </ul>
+
+                                <h6 class="text-warning">Weekly Maintenance</h6>
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-oil-can text-warning me-2"></i>Lubricate bearing points</span>
+                                        <span class="badge bg-warning">15 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-tachometer-alt text-warning me-2"></i>Calibrate tension sensors</span>
+                                        <span class="badge bg-warning">10 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-cogs text-warning me-2"></i>Check belt tension and alignment</span>
+                                        <span class="badge bg-warning">20 min</span>
+                                    </li>
+                                </ul>
+
+                                <h6 class="text-danger">Monthly Maintenance</h6>
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-filter text-danger me-2"></i>Replace air filters</span>
+                                        <span class="badge bg-danger">30 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-microchip text-danger me-2"></i>Software backup and updates</span>
+                                        <span class="badge bg-danger">45 min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-clipboard-check text-danger me-2"></i>Complete system diagnostics</span>
+                                        <span class="badge bg-danger">60 min</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>Maintenance Checklist
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="maintenanceChecklist">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check1">
+                                    <label class="form-check-label small" for="check1">
+                                        Material guides cleaned
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check2">
+                                    <label class="form-check-label small" for="check2">
+                                        Sensors calibrated
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check3">
+                                    <label class="form-check-label small" for="check3">
+                                        Lubrication completed
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check4">
+                                    <label class="form-check-label small" for="check4">
+                                        Belt tension checked
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check5">
+                                    <label class="form-check-label small" for="check5">
+                                        Safety systems tested
+                                    </label>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm w-100 mt-3" onclick="submitMaintenanceLog()">
+                                    <i class="fas fa-check me-2"></i>Complete Check
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Maintenance Alerts
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <small><strong>Due:</strong> Weekly lubrication</small>
+                            </div>
+                            <div class="alert alert-info">
+                                <small><strong>Upcoming:</strong> Filter replacement in 5 days</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="tab-pane fade" id="troubleshooting" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Common Issues & Solutions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="troubleshootingAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading1">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    <i class="fas fa-times-circle text-danger me-2"></i>Material Jamming
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-danger">Possible Causes:</h6>
+                                            <ul>
+                                                <li>Incorrect tension settings</li>
+                                                <li>Misaligned material guides</li>
+                                                <li>Damaged or worn rollers</li>
+                                                <li>Foreign objects in material path</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="text-success">Solutions:</h6>
+                                            <ol>
+                                                <li>Stop machine immediately</li>
+                                                <li>Check and adjust tension settings</li>
+                                                <li>Realign material guides</li>
+                                                <li>Inspect and clean material path</li>
+                                                <li>Replace worn components if necessary</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    <i class="fas fa-eye-slash text-warning me-2"></i>QR Code Reading Errors
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-danger">Possible Causes:</h6>
+                                            <ul>
+                                                <li>Dirty or damaged scanner lens</li>
+                                                <li>Poor print quality on labels</li>
+                                                <li>Incorrect scanner positioning</li>
+                                                <li>Inadequate lighting conditions</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="text-success">Solutions:</h6>
+                                            <ol>
+                                                <li>Clean scanner lens with approved solution</li>
+                                                <li>Check and adjust scanner position</li>
+                                                <li>Verify QR code print quality</li>
+                                                <li>Adjust lighting or scanner sensitivity</li>
+                                                <li>Recalibrate scanner if necessary</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                    <i class="fas fa-tachometer-alt text-info me-2"></i>Speed Control Issues
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-danger">Possible Causes:</h6>
+                                            <ul>
+                                                <li>Motor drive malfunction</li>
+                                                <li>Encoder feedback errors</li>
+                                                <li>Control system faults</li>
+                                                <li>Mechanical binding</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="text-success">Solutions:</h6>
+                                            <ol>
+                                                <li>Check motor drive connections</li>
+                                                <li>Verify encoder alignment and cleanliness</li>
+                                                <li>Reset control system parameters</li>
+                                                <li>Inspect for mechanical obstructions</li>
+                                                <li>Contact technical support if issue persists</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Guidelines -->
+        <div class="tab-pane fade" id="safety" role="tabpanel">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>Safety Requirements
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="safety-section mb-4">
+                                <h6 class="text-danger">
+                                    <i class="fas fa-hard-hat me-2"></i>Personal Protective Equipment (PPE)
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success me-2"></i>Safety glasses (ANSI Z87.1)</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Steel-toed safety shoes</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Cut-resistant gloves when handling materials</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-times text-danger me-2"></i>Loose clothing near moving parts</li>
+                                            <li><i class="fas fa-times text-danger me-2"></i>Jewelry or watches</li>
+                                            <li><i class="fas fa-times text-danger me-2"></i>Long hair not tied back</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="safety-section mb-4">
+                                <h6 class="text-warning">
+                                    <i class="fas fa-bolt me-2"></i>Electrical Safety
+                                </h6>
+                                <div class="alert alert-warning">
+                                    <strong>WARNING:</strong> Only qualified electricians should work on electrical components.
+                                </div>
+                                <ul>
+                                    <li>Always use lockout/tagout procedures during maintenance</li>
+                                    <li>Verify power is off before opening electrical panels</li>
+                                    <li>Use properly rated tools and test equipment</li>
+                                    <li>Maintain proper grounding on all equipment</li>
+                                </ul>
+                            </div>
+
+                            <div class="safety-section mb-4">
+                                <h6 class="text-info">
+                                    <i class="fas fa-cogs me-2"></i>Mechanical Safety
+                                </h6>
+                                <ul>
+                                    <li>Never bypass safety guards or interlocks</li>
+                                    <li>Keep hands and tools clear of moving parts</li>
+                                    <li>Use proper lifting techniques for heavy components</li>
+                                    <li>Ensure emergency stops are functional and accessible</li>
+                                </ul>
+                            </div>
+
+                            <div class="safety-section">
+                                <h6 class="text-success">
+                                    <i class="fas fa-first-aid me-2"></i>Emergency Procedures
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h7><strong>In case of injury:</strong></h7>
+                                        <ol class="small">
+                                            <li>Stop machine immediately</li>
+                                            <li>Provide first aid if trained</li>
+                                            <li>Call emergency services if needed</li>
+                                            <li>Report incident to supervisor</li>
+                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h7><strong>Equipment malfunction:</strong></h7>
+                                        <ol class="small">
+                                            <li>Use emergency stop button</li>
+                                            <li>Isolate power if safe to do so</li>
+                                            <li>Clear work area of personnel</li>
+                                            <li>Contact maintenance immediately</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-phone me-2"></i>Emergency Contacts
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="contact-item mb-3">
+                                <strong>Emergency Services</strong><br>
+                                <span class="text-danger h5">911</span>
+                            </div>
+                            <div class="contact-item mb-3">
+                                <strong>Plant Safety Officer</strong><br>
+                                <span class="text-info">Ext. 2345</span>
+                            </div>
+                            <div class="contact-item mb-3">
+                                <strong>Maintenance Supervisor</strong><br>
+                                <span class="text-info">Ext. 1234</span>
+                            </div>
+                            <div class="contact-item mb-3">
+                                <strong>Technical Support</strong><br>
+                                <span class="text-info">1-800-555-0123</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-file-alt me-2"></i>Safety Documentation
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><a href="#" class="text-decoration-none"><i class="fas fa-file-pdf text-danger me-2"></i>Safety Data Sheets</a></li>
+                                <li><a href="#" class="text-decoration-none"><i class="fas fa-file-pdf text-danger me-2"></i>OSHA Guidelines</a></li>
+                                <li><a href="#" class="text-decoration-none"><i class="fas fa-file-pdf text-danger me-2"></i>Risk Assessment</a></li>
+                                <li><a href="#" class="text-decoration-none"><i class="fas fa-file-pdf text-danger me-2"></i>Training Records</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function printGuidelines() {
+    window.print();
+}
+
+function exportGuidelines() {
+    alert('PDF export functionality would be implemented here');
+}
+
+function submitMaintenanceLog() {
+    const checkedItems = document.querySelectorAll('#maintenanceChecklist input[type="checkbox"]:checked').length;
+    const totalItems = document.querySelectorAll('#maintenanceChecklist input[type="checkbox"]').length;
+    
+    if (checkedItems === totalItems) {
+        alert('Maintenance checklist completed successfully!');
+        document.getElementById('maintenanceChecklist').reset();
+    } else {
+        alert(`Please complete all checklist items. ${checkedItems}/${totalItems} completed.`);
+    }
+}
+
+// Auto-expand first troubleshooting item
+document.addEventListener('DOMContentLoaded', function() {
+    // The first accordion item is already shown via Bootstrap classes
+});
+</script>
+{% endblock %}

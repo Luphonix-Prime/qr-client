@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Login - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-gradient">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">QR Compliance System</h2>
+                        <p class="text-muted">Professional QR Code Management</p>
+                    </div>
+
+                    {% if not show_register and not show_change_password %}
+                    <!-- Login Form -->
+                    <form method="POST" id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-2"></i>Username
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Remember me</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </form>
+
+                    <!-- Register Link (only show if no users exist or current user is admin) -->
+                    <div class="text-center">
+                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                            <i class="fas fa-user-plus me-1"></i>Need an account? Register here
+                        </a>
+                    </div>
+
+                    {% elif show_register %}
+                    <!-- Registration Form -->
+                    <h3 class="text-center mb-4">Create Account</h3>
+                    <form method="POST" id="registerForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        {% if current_user.is_authenticated and current_user.has_role('Admin') %}
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="Factory">Factory</option>
+                                <option value="QA">QA</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Login
+                        </a>
+                    </div>
+
+                    {% elif show_change_password %}
+                    <!-- Change Password Form -->
+                    <h3 class="text-center mb-4">Change Password</h3>
+                    <form method="POST" id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </button>
+                    </form>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('dashboard') }}" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (form.id === 'registerForm' || form.id === 'changePasswordForm') {
+                const password = form.querySelector('#password, #new_password').value;
+                const confirmPassword = form.querySelector('#confirm_password').value;
+                
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    return false;
+                }
+                
+                if (password.length < 6) {
+                    e.preventDefault();
+                    alert('Password must be at least 6 characters long!');
+                    return false;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

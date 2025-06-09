@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                </h1>
+                <div class="text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    <span id="currentTime"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Products</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ stats.total_products }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">QR Codes Generated</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ stats.total_qr_codes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-qrcode fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Active Batches</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ stats.active_batches }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-layer-group fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">This Week's Jobs</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ stats.recent_print_jobs }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-print fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('new_product') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <span>Add Product</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('qr_generation') }}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                <i class="fas fa-qrcode fa-2x mb-2"></i>
+                                <span>Generate QR</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('printing_interface') }}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                <i class="fas fa-print fa-2x mb-2"></i>
+                                <span>Print Labels</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('reports') }}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <span>View Reports</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>Recent Batches
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_batches %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Batch Code</th>
+                                    <th>Product</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for batch in recent_batches %}
+                                <tr>
+                                    <td><code>{{ batch.batch_code }}</code></td>
+                                    <td>{{ batch.product.name[:20] }}{% if batch.product.name|length > 20 %}...{% endif %}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if batch.status == 'Generated' else 'warning' if batch.status == 'Pending' else 'primary' }}">
+                                            {{ batch.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ batch.created_at.strftime('%m/%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No recent batches</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-box me-2"></i>Recent Products
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_products %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in recent_products %}
+                                <tr>
+                                    <td><code>{{ product.sku }}</code></td>
+                                    <td>{{ product.name[:20] }}{% if product.name|length > 20 %}...{% endif %}</td>
+                                    <td>{{ product.category or '-' }}</td>
+                                    <td>{{ product.created_at.strftime('%m/%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No recent products</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-server me-2"></i>System Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-circle text-success me-2"></i>
+                                <span>Database Connection</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-circle text-success me-2"></i>
+                                <span>QR Generation Service</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-circle text-success me-2"></i>
+                                <span>File System Access</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString();
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // Auto-refresh statistics every 30 seconds
+    setInterval(function() {
+        // This could be enhanced to fetch updated stats via AJAX
+    }, 30000);
+});
+</script>
+{% endblock %}

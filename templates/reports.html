@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - QR Code Compliance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>Reports & Analytics
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">
+                        <i class="fas fa-plus me-2"></i>Generate Report
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="scheduleReport()">
+                        <i class="fas fa-clock me-2"></i>Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Categories -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
+                    <h5>Production Reports</h5>
+                    <p class="text-muted small">QR generation, batch tracking, production metrics</p>
+                    <button class="btn btn-outline-primary btn-sm" onclick="showReportType('production')">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
+                    <h5>Quality Reports</h5>
+                    <p class="text-muted small">Compliance tracking, error rates, audit trails</p>
+                    <button class="btn btn-outline-success btn-sm" onclick="showReportType('quality')">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-boxes fa-2x text-warning mb-3"></i>
+                    <h5>Inventory Reports</h5>
+                    <p class="text-muted small">Stock levels, product usage, batch consumption</p>
+                    <button class="btn btn-outline-warning btn-sm" onclick="showReportType('inventory')">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-print fa-2x text-info mb-3"></i>
+                    <h5>Print Reports</h5>
+                    <p class="text-muted small">Printer usage, job status, resource consumption</p>
+                    <button class="btn btn-outline-info btn-sm" onclick="showReportType('printing')">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>Generated Reports
+                </h5>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="filterReports('all')" id="filter-all">All</button>
+                    <button class="btn btn-outline-secondary" onclick="filterReports('pending')" id="filter-pending">Pending</button>
+                    <button class="btn btn-outline-secondary" onclick="filterReports('completed')" id="filter-completed">Completed</button>
+                    <button class="btn btn-outline-secondary" onclick="filterReports('failed')" id="filter-failed">Failed</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if reports %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>Report Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Generated</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr data-status="{{ report.status.lower() }}">
+                            <td>
+                                <div>
+                                    <strong>{{ report.name }}</strong>
+                                    <br><small class="text-muted">{{ report.report_type }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ report.report_type }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if report.status == 'Completed' else 'warning' if report.status == 'Pending' else 'danger' }}">
+                                    {{ report.status }}
+                                </span>
+                            </td>
+                            <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if report.generated_at %}
+                                {{ report.generated_at.strftime('%Y-%m-%d %H:%M') }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if report.file_path %}
+                                <span class="text-muted">2.3 MB</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    {% if report.status == 'Completed' and report.file_path %}
+                                    <button class="btn btn-outline-primary" onclick="downloadReport({{ report.id }})" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-info" onclick="viewReport({{ report.id }})" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if report.status == 'Pending' %}
+                                    <button class="btn btn-outline-warning" onclick="cancelReport({{ report.id }})" title="Cancel">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-danger" onclick="deleteReport({{ report.id }})" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                <h5>No reports generated yet</h5>
+                <p>Create your first report to start analyzing your QR code data</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">
+                    <i class="fas fa-plus me-2"></i>Generate Report
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Analytics -->
+    {% if reports %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Quick Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Report Generation Trends</h6>
+                            <canvas id="reportTrendsChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Report Types Distribution</h6>
+                            <canvas id="reportTypesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Generate Report Modal -->
+<div class="modal fade" id="generateReportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Generate New Report
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="generateReportForm">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="reportName" class="form-label">Report Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="reportName" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reportType" class="form-label">Report Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="reportType" name="report_type" required onchange="updateReportOptions()">
+                                <option value="">Select type...</option>
+                                <option value="production">Production Report</option>
+                                <option value="quality">Quality Report</option>
+                                <option value="inventory">Inventory Report</option>
+                                <option value="printing">Print Report</option>
+                                <option value="audit">Audit Trail</option>
+                                <option value="custom">Custom Report</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="dateFrom" class="form-label">Date From</label>
+                            <input type="date" class="form-control" id="dateFrom" name="date_from">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dateTo" class="form-label">Date To</label>
+                            <input type="date" class="form-control" id="dateTo" name="date_to">
+                        </div>
+                    </div>
+                    
+                    <div id="reportOptions" class="mb-3">
+                        <!-- Dynamic options based on report type -->
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="reportFormat" class="form-label">Output Format</label>
+                            <select class="form-select" id="reportFormat" name="format">
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="reportFrequency" class="form-label">Frequency</label>
+                            <select class="form-select" id="reportFrequency" name="frequency">
+                                <option value="once">One-time</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reportDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="reportDescription" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="emailReport" name="email_report">
+                        <label class="form-check-label" for="emailReport">
+                            Email report when completed
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Report Details Modal -->
+<div class="modal fade" id="reportDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-bar me-2"></i>Report Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reportDetailsContent">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadCurrentReport()">
+                    <i class="fas fa-download me-2"></i>Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let currentReportId = null;
+
+function updateReportOptions() {
+    const reportType = document.getElementById('reportType').value;
+    const optionsDiv = document.getElementById('reportOptions');
+    
+    let optionsHTML = '';
+    
+    switch(reportType) {
+        case 'production':
+            optionsHTML = `
+                <label class="form-label">Production Filters</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <select class="form-select" name="product_filter">
+                            <option value="">All Products</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="automotive">Automotive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" name="batch_status">
+                            <option value="">All Statuses</option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            break;
+        case 'quality':
+            optionsHTML = `
+                <label class="form-label">Quality Metrics</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="include_audit_trail" checked>
+                    <label class="form-check-label">Include Audit Trail</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="include_error_rates">
+                    <label class="form-check-label">Include Error Rates</label>
+                </div>
+            `;
+            break;
+        case 'inventory':
+            optionsHTML = `
+                <label class="form-label">Inventory Options</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="low_stock_alert">
+                    <label class="form-check-label">Include Low Stock Alerts</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="usage_trends" checked>
+                    <label class="form-check-label">Include Usage Trends</label>
+                </div>
+            `;
+            break;
+        case 'printing':
+            optionsHTML = `
+                <label class="form-label">Printer Selection</label>
+                <select class="form-select" name="printer_filter">
+                    <option value="">All Printers</option>
+                    <option value="thermal">Thermal Printers</option>
+                    <option value="inkjet">Inkjet Printers</option>
+                </select>
+            `;
+            break;
+    }
+    
+    optionsDiv.innerHTML = optionsHTML;
+}
+
+function showReportType(type) {
+    document.getElementById('reportType').value = type;
+    updateReportOptions();
+    $('#generateReportModal').modal('show');
+}
+
+function filterReports(status) {
+    const rows = document.querySelectorAll('#reportsTable tbody tr');
+    const buttons = document.querySelectorAll('[id^="filter-"]');
+    
+    // Update active button
+    buttons.forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`filter-${status}`).classList.add('active');
+    
+    // Filter rows
+    rows.forEach(row => {
+        if (status === 'all' || row.getAttribute('data-status') === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function downloadReport(reportId) {
+    console.log('Downloading report:', reportId);
+    // Implement download functionality
+}
+
+function viewReport(reportId) {
+    currentReportId = reportId;
+    
+    // Load report details
+    document.getElementById('reportDetailsContent').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Report Information</h6>
+                <table class="table table-borderless">
+                    <tr><td><strong>ID:</strong></td><td>${reportId}</td></tr>
+                    <tr><td><strong>Type:</strong></td><td>Production Report</td></tr>
+                    <tr><td><strong>Status:</strong></td><td><span class="badge bg-success">Completed</span></td></tr>
+                    <tr><td><strong>Generated:</strong></td><td>${new Date().toLocaleString()}</td></tr>
+                    <tr><td><strong>Size:</strong></td><td>2.3 MB</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6>Report Summary</h6>
+                <div class="border rounded p-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h5 text-primary">1,234</div>
+                            <small>Total QR Codes</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h5 text-success">98.5%</div>
+                            <small>Success Rate</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h5 text-info">45</div>
+                            <small>Batches</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#reportDetailsModal').modal('show');
+}
+
+function cancelReport(reportId) {
+    if (confirm('Are you sure you want to cancel this report generation?')) {
+        console.log('Cancelling report:', reportId);
+    }
+}
+
+function deleteReport(reportId) {
+    if (confirm('Are you sure you want to delete this report?')) {
+        console.log('Deleting report:', reportId);
+        // Remove from DOM
+        document.querySelector(`[onclick="deleteReport(${reportId})"]`).closest('tr').remove();
+    }
+}
+
+function downloadCurrentReport() {
+    if (currentReportId) {
+        downloadReport(currentReportId);
+    }
+}
+
+function scheduleReport() {
+    $('#generateReportModal').modal('show');
+    document.getElementById('reportFrequency').value = 'weekly';
+}
+
+// Form submission
+document.getElementById('generateReportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    console.log('Generating report:', Object.fromEntries(formData));
+    
+    $('#generateReportModal').modal('hide');
+    alert('Report generation started. You will be notified when it is completed.');
+    this.reset();
+});
+
+// Initialize charts if reports exist
+{% if reports %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Report trends chart
+    const trendsCtx = document.getElementById('reportTrendsChart').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Reports Generated',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Report types chart
+    const typesCtx = document.getElementById('reportTypesChart').getContext('2d');
+    new Chart(typesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Production', 'Quality', 'Inventory', 'Printing'],
+            datasets: [{
+                data: [30, 25, 25, 20],
+                backgroundColor: [
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 99, 132)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+});
+{% endif %}
+
+// Set default dates
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById('dateFrom').value = lastWeek.toISOString().split('T')[0];
+    document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}
